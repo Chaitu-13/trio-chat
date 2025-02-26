@@ -1,11 +1,12 @@
-from myapp import create_app
-from myapp.database import db, Message, ChatMessage
+from app import create_app
+from app.database import db, Message, ChatMessage
 from flask_socketio import emit, join_room, leave_room
 
 app, socket = create_app()
 
 
 # COMMUNICATION ARCHITECTURE
+
 
 # Join-chat event. Emit online message to other users and join the room
 @socket.on("join-chat")

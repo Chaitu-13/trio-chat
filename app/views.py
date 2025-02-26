@@ -8,12 +8,12 @@ from flask import (
     flash,
     jsonify,
 )
-from myapp.database import *
+from app.database import *
 from functools import wraps
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from myapp import socket
+from app import socket
 from datetime import datetime, timedelta
 
 views = Blueprint(
