@@ -97,18 +97,14 @@ def login():
         user = User.query.filter_by(email=email).first()
 
         if user and user.check_password(password):
-            # Create response object
-            response = redirect(url_for("views.chat"))
+            # Save user data to session
+            session["user"] = {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+            }
 
-            # Set cookies with expiry of 1 day (24 hours)
-            expiration = datetime.now() + timedelta(days=1)
-
-            # Set cookies for the user data
-            response.set_cookie("user_id", str(user.id), expires=expiration)
-            response.set_cookie("username", user.username, expires=expiration)
-            response.set_cookie("email", user.email, expires=expiration)
-
-            return response
+            return redirect(url_for("views.chat"))
         else:
             flash("Invalid login credentials. Please try again.")
             return redirect(url_for("views.login"))
@@ -254,7 +250,7 @@ def ftime(date):
 
     time_format = "%I:%M %p"  # 12-hour clock format with AM/PM
     formatted_time = dt.strftime(time_format)
-    formatted_time += " | " + dt.strftime("%m/%d")  # Format date as MM/DD
+    formatted_time += " | " + dt.strftime("%m/%d/%Y")  # Format date as MM/DD/YYYY
 
     return formatted_time
 
