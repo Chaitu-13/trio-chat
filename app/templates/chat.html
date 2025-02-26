@@ -128,7 +128,7 @@
     }
     let scrollDown = () => {
       //scrollingElement.scrollTop = scrollingElement.scrollHeight;
-      //$container.animate({scrollTop: $container[0].scrollHeight }, "slow");
+      //$container.animate({ scrollTop: $container[0].scrollHeight }, "slow");
       validatePosition();
       location.href = "#last_message";
       init();
@@ -206,7 +206,7 @@
       const day = date.getDate();
 
       // Create a string with the desired time format.
-      const timeFormat = `${formattedHours}:${minutes} ${(hours >= 12) ? 'PM' : 'AM'} | ${month}/${day}`;
+      const timeFormat = `${formattedHours}:${minutes} ${(hours >= 12) ? 'PM' : 'AM'} | ${month}/${day}/${date.getFullYear()}`;
 
       // Return the time format string.
       return timeFormat;
