@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from passlib.hash import pbkdf2_sha256
-
+import uuid
 
 db = SQLAlchemy()
 
@@ -12,6 +12,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    msg_id = db.Column(db.BigInteger, unique=True, nullable=False, default=lambda: int(str(uuid.uuid4().int)[:10]) % (10**10))
 
     def set_password(self, password):
         self.password = pbkdf2_sha256.hash(password)
