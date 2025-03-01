@@ -102,6 +102,7 @@ def login():
                 "id": user.id,
                 "username": user.username,
                 "email": user.email,
+                "msg_id": user.msg_id,
             }
 
             return redirect(url_for("views.chat"))
@@ -122,14 +123,14 @@ def new_chat():
         Response: Flask response object.
     """
     user_id = session["user"]["id"]
-    new_chat_email = request.form["email"].strip().lower()
+    new_chat_email = request.form["msg_id"]
 
     # If user is trying to add themselves, do nothing
-    if new_chat_email == session["user"]["email"]:
+    if new_chat_email == session["user"]["msg_id"]:
         return redirect(url_for("views.chat"))
 
     # Check if the recipient user exists
-    recipient_user = User.query.filter_by(email=new_chat_email).first()
+    recipient_user = User.query.filter_by(msg_id=new_chat_email).first()
     if not recipient_user:
         return redirect(url_for("views.chat"))
 
@@ -322,4 +323,4 @@ def leave():
         Response: Flask response object.
     """
     socket.emit("disconnect")
-    return redirect(url_for("views.home"))
+    return redirect(url_for("views.index"))
