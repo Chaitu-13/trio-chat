@@ -4,58 +4,70 @@
 <head>
   <meta charset="UTF-8">
   <title>Trio Chat</title>
-  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+
   <link rel="stylesheet" href="/static/chat.css">
-  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" type="text/css"
     rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
     integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
     crossorigin="anonymous"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
+
   <div class="container">
-    <div class="container-header">
-      <h3 class=" text-left"> {{ user_data["username"] }}</h3>
-      <h3 class=" text-center">Trio Chat</h3>
-      <h3 class=" text-right">{{ user_data["email"] }}</h3>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <a class="navbar-brand" href="#">Trio Chat</a>
+      <button class="navbar-toggler" type="button" id="navbar-toggler" aria-expanded="false"
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-collapse" id="navbar-collapse">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="#">Username: <strong>{{ user_data["username"] }}</strong></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Message ID: <strong>{{ user_data["msg_id"] }}</strong></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link logout" href="{{ url_for('views.leave') }}">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="new_chat">
+      <div id="new_chat_overlay"></div>
+      <form method="POST" action="{{ url_for('views.new_chat') }}" id="new_chat_form">
+        <label for="msg_id"><strong>Message ID: </strong></label>
+        <input type="text" name="msg_id" placeholder="enter message id here...">
+        <input type="submit" value="Submit">
+      </form>
     </div>
     <div class="messaging">
-      <div class="inbox_msg">
-        <div class="inbox_people">
+      <div class="inbox_msg" id="inbox_msg">
+        <!-- Inbox people section -->
+        <div class="inbox_people" id="inbox_people">
           <div class="headind_srch">
             <div class="recent_heading">
               <h4>Recent</h4>
             </div>
-            <div class="srch_bar">
-              <div class="stylish-input-group">
-                <input type="text" class="search-bar" placeholder="Search">
-                <span class="input-group-addon">
-                  <button type="button"> <i class="fa fa-search" aria-hidden="true"></i> </button>
-                </span>
-              </div>
-            </div>
-            <div class="new_chat">
-              <div id="new_chat_overlay"></div>
-              <button id="new_chat_btn"><i class="fa fa-plus"></i> New Chat</button>
-              <form method="POST" action="{{ url_for('views.new_chat') }}" id="new_chat_form">
-                <label for="email"><strong>Email: </strong></label>
-                <input type="email" name="email" placeholder="enter friend's email here...">
-                <input type="submit" value="Submit">
-              </form>
-            </div>
+
           </div>
           <div class="inbox_chat">
             {% for i in data %}
-            <a href="{{ url_for('views.chat',rid=i.room_id) }}">
+            <a href="{{ url_for('views.chat', rid=i.room_id) }}">
               <div class="chat_list" id="{{ i.room_id }}">
                 <div class="chat_people">
-                  <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
+                  <div class="chat_img">
+                    <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil">
+                    <h3>{{ i["username"] }}</h3>
+                  </div>
                   <div class="chat_ib">
-                    <h5>{{ i["username"] }}</h5>
-                    <p id="last-message">{{ i["last_message"] }}</p>
+                    <p id="last-message">Last Message: {{ i["last_message"] }}</p>
                   </div>
                 </div>
               </div>
@@ -63,80 +75,91 @@
             {% endfor %}
           </div>
         </div>
-        <div class="mesgs">
-          <div class="msg_history">
-            {% for j in messages %}
-            {% if j.sender_username==user_data["username"] %}
-            <div class="outgoing_msg" id="{{ j.timestamp }}">
-              <div class="sent_msg">
+      </div>
+
+      <!-- MESSAGE BOX -->
+      <div class="mesgs">
+        <div class="msg_history">
+          <a href="{{ url_for('views.chat') }}">Back <i class="fa-thin fa-caret-left"></i></a>
+          {% for j in messages %}
+          {% if j.sender_username==user_data["username"] %}
+          <div class="outgoing_msg" id="{{ j.timestamp }}">
+            <div class="sent_msg">
+              <p>{{ j.content }}</p>
+              <span class="time_date">{{ j.timestamp | ftime }}</span>
+            </div>
+          </div>
+          {% else %}
+          <div class="incoming_msg" id="{{ j.timestamp }}">
+            <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="..."> </div>
+            <div class="received_msg">
+              <div class="received_withd_msg">
                 <p>{{ j.content }}</p>
                 <span class="time_date">{{ j.timestamp | ftime }}</span>
               </div>
             </div>
-            {% else %}
-            <div class="incoming_msg" id="{{ j.timestamp }}">
-              <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil">
-              </div>
-              <div class="received_msg">
-                <div class="received_withd_msg">
-                  <p>{{ j.content }}</p>
-                  <span class="time_date">{{ j.timestamp | ftime }}</span>
-                </div>
-              </div>
-            </div>
-            {% endif %}
-            {% endfor %}
           </div>
-          <div class="type_msg">
-            <div class="input_msg_write">
-              <form id="chat_form">
-                <input type="text" class="message" placeholder="Type a message" />
-                <button class="msg_send_btn" type="submit">
-                  <i class="fa fa-paper-plane-o" aria-hidden="true"></i>
-                </button>
-              </form>
-            </div>
+          {% endif %}
+          {% endfor %}
+        </div>
 
+        <div class="type_msg">
+          <div class="input_msg_write">
+            <form id="chat_form">
+              <input type="text" class="message" placeholder="Type a message" />
+              <button class="msg_send_btn" type="submit">
+                <i class="fa fa-paper-plane-o" aria-hidden="true"></i>
+              </button>
+            </form>
           </div>
         </div>
       </div>
-
     </div>
   </div>
+
   <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
   <script type="text/javascript">
+    // Check if URL has the ?rid parameter and hide inbox_people div accordingly
+    window.onload = function () {
+      // If the URL contains '?rid', hide the inbox_people div and show the chat
+      if (window.location.search.includes("rid")) {
+        document.getElementById('inbox_people').style.display = 'none';
+      }
 
-    // THIS FUNCTION SHOULD SCROLL DOWN AUTOMATICALLY
-    //let scrollingElement = (document.scrollingElement || document.body)
-    let msgH = document.querySelectorAll(".msg_history > div"), CurrentLen;
-    let init = () => {
-      CurrentLen = msgH.length;
-    }
-    init();
-    let validatePosition = () => {
-      if (msgH.length === CurrentLen) {
-        msgH[msgH.length - 1].setAttribute("id", "last_message");
-        for (var i; i < msgH.length; i++) {
-          if (msgH[i].id === "last_message" && msgH[i] !== msgH.length - 1) {
-            msgH[i].removeAttribute("id");
-            msgH[msgH.length - 1].setAttribute("id", "last_message");
-          }
+
+      let newChatBtn = document.querySelector('#new_chat_btn');
+      let newChatForm = document.querySelector('#new_chat_form');
+      let newChatoverlay = document.querySelector('#new_chat_overlay');
+      newChatBtn.onclick = (e) => {
+        if (e.target === newChatBtn) {
+          newChatForm.style.display = "block";
+          newChatoverlay.style.display = 'block';
+        }
+      }
+
+      newChatoverlay.onclick = (e) => {
+        if (e.target === newChatoverlay) {
+          newChatForm.style.display = "none";
+          newChatoverlay.style.display = 'none';
+        }
+      }
+
+      let inboxPeople = document.querySelector('.inbox_people');
+      let inboxMsg = document.querySelector('.inbox_msg');
+      newChatBtn.onclick = (e) => {
+        if (e.target === newChatBtn) {
+          inboxPeople.style.display = "none";
+          inboxMsg.style.display = "block";
         }
       }
     }
-    let scrollDown = () => {
-      //scrollingElement.scrollTop = scrollingElement.scrollHeight;
-      //$container.animate({ scrollTop: $container[0].scrollHeight }, "slow");
-      validatePosition();
-      location.href = "#last_message";
-      init();
-    }
+  </script>
 
-    // SOCKET CODE
-    var socket = io.connect('http://' + document.domain + ':' + location.port + '/?rid={{ room_id }}');
-    //scrollDown()
+  <!-- Socket.io & Chat Logic -->
+  <script>
+    var socket = io.connect('https://fully-logical-martin.ngrok-free.app' + '/?rid={{ room_id }}');
     socket.on('connect', function () {
       socket.emit('join-chat', {
         rid: '{{ room_id }}'
@@ -150,6 +173,10 @@
     var form = $('#chat_form').on('submit', function (e) {
       e.preventDefault()
       let user_input = $('input.message').val()
+      if (!user_input.trim()) {
+        alert("Warning: Message cannot be empty!");
+        return;
+      }
 
       socket.emit('outgoing', {
         timestamp: parseInt(Date.now() / 1000),
@@ -158,7 +185,6 @@
         message: user_input,
         rid: "{{ room_id }}"
       })
-      //scrollDown();
       $('div.msg_history').append(`
             <div class="outgoing_msg">
               <div class="sent_msg">
@@ -183,11 +209,21 @@
       scrollDown();
       document.getElementById("last-message").innerHTML = msg.message
     })
-
   </script>
+
+  <!--Navigation >-->
+  <script>
+    document.getElementById('navbar-toggler').addEventListener('click', function () {
+      var collapse = document.getElementById('navbar-collapse');
+      var toggler = document.getElementById('navbar-toggler');
+      collapse.classList.toggle('open');
+      toggler.classList.toggle('open');  // Add or remove the "open" class on the toggler itself
+    });
+  </script>
+
+  <!-- Time Format -->
   <script>
     function formatDate(date) {
-      // Get the hours, minutes, and seconds from the Date object.
       const hours = date.getHours();
       let formattedHours;
 
@@ -199,38 +235,12 @@
         formattedHours = hours;
       }
       const minutes = date.getMinutes();
-      //const seconds = date.getSeconds();
 
-      // Get the month and day from the Date object.
       const month = date.getMonth() + 1;
       const day = date.getDate();
 
-      // Create a string with the desired time format.
       const timeFormat = `${formattedHours}:${minutes} ${(hours >= 12) ? 'PM' : 'AM'} | ${month}/${day}/${date.getFullYear()}`;
-
-      // Return the time format string.
       return timeFormat;
-    }
-  </script>
-
-  <script>
-    window.onload = function () {
-      let newChatBtn = document.querySelector('#new_chat_btn');
-      let newChatForm = document.querySelector('#new_chat_form');
-      let newChatoverlay = document.querySelector('#new_chat_overlay');
-      newChatBtn.onclick = (e) => {
-        if (e.target === newChatBtn) {
-          newChatForm.style.display = "block";
-          newChatoverlay.style.display = 'block';
-
-        }
-      }
-      newChatoverlay.onclick = (e) => {
-        if (e.target === newChatoverlay) {
-          newChatForm.style.display = "none";
-          newChatoverlay.style.display = 'none';
-        }
-      }
     }
   </script>
 </body>
